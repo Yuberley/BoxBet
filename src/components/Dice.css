@@ -1,0 +1,137 @@
+.dice-container {
+  perspective: 1000px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.dice {
+  width: 100px;
+  height: 100px;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 1.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.dice.rolling {
+  animation: diceShake 0.3s ease-in-out;
+}
+
+@keyframes diceShake {
+  0%, 100% { transform: translateY(0) rotateX(0deg) rotateY(0deg); }
+  25% { transform: translateY(-10px) rotateX(20deg) rotateY(-20deg); }
+  50% { transform: translateY(-5px) rotateX(-15deg) rotateY(15deg); }
+  75% { transform: translateY(-8px) rotateX(10deg) rotateY(-10deg); }
+}
+
+.dice-face {
+  position: absolute;
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(145deg, #ffffff 0%, #f0f0f0 50%, #e8e8e8 100%);
+  border: 3px solid #d0d0d0;
+  border-radius: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-content: space-between;
+  padding: 15px;
+  box-shadow: 
+    inset 0 5px 10px rgba(255, 255, 255, 0.8),
+    inset 0 -5px 10px rgba(0, 0, 0, 0.2),
+    0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.dice-face::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  left: 10%;
+  width: 35%;
+  height: 35%;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.6), transparent);
+  border-radius: 50%;
+  filter: blur(8px);
+}
+
+/* Posicionamiento de las caras del dado */
+.dice-face-1 {
+  transform: rotateY(0deg) translateZ(50px);
+}
+
+.dice-face-2 {
+  transform: rotateY(90deg) translateZ(50px);
+}
+
+.dice-face-3 {
+  transform: rotateY(180deg) translateZ(50px);
+}
+
+.dice-face-4 {
+  transform: rotateY(-90deg) translateZ(50px);
+}
+
+.dice-face-5 {
+  transform: rotateX(90deg) translateZ(50px);
+}
+
+.dice-face-6 {
+  transform: rotateX(-90deg) translateZ(50px);
+}
+
+/* Puntos del dado */
+.dot {
+  width: 18px;
+  height: 18px;
+  background: radial-gradient(circle, #333 0%, #1a1a1a 70%);
+  border-radius: 50%;
+  box-shadow: 
+    inset 0 2px 3px rgba(0, 0, 0, 0.4),
+    0 1px 2px rgba(0, 0, 0, 0.3);
+  position: absolute;
+}
+
+/* Posiciones de los puntos */
+.dot-top-left {
+  top: 15px;
+  left: 15px;
+}
+
+.dot-top-right {
+  top: 15px;
+  right: 15px;
+}
+
+.dot-middle-left {
+  top: 50%;
+  left: 15px;
+  transform: translateY(-50%);
+}
+
+.dot-middle-right {
+  top: 50%;
+  right: 15px;
+  transform: translateY(-50%);
+}
+
+.dot-center {
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.dot-bottom-left {
+  bottom: 15px;
+  left: 15px;
+}
+
+.dot-bottom-right {
+  bottom: 15px;
+  right: 15px;
+}
+
+/* Animación de rebote cuando termina de rodar */
+@keyframes diceBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
