@@ -10,14 +10,17 @@ WORKDIR /app
 # Copiar package.json y package-lock.json
 COPY package*.json ./
 
-# Instalar dependencias
-RUN npm install --production
+# Instalar TODAS las dependencias (necesitamos TypeScript para compilar)
+RUN npm install
 
 # Copiar código fuente
 COPY . .
 
 # Compilar TypeScript
 RUN npm run build
+
+# Limpiar devDependencies después de compilar
+RUN npm prune --production
 
 # Exponer puerto
 EXPOSE 7001
