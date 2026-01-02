@@ -16,6 +16,7 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: slideUp 0.5s ease-out;
   position: relative;
+  pointer-events: auto;
 }
 
 @keyframes slideUp {
@@ -26,6 +27,13 @@
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Disable animations during interaction on mobile */
+@media (pointer: coarse) {
+  .setup-card * {
+    transition-duration: 0.1s !important;
   }
 }
 
@@ -68,15 +76,25 @@
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: center;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1);
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: auto;
+  position: relative;
+  z-index: 10;
 }
 
-.btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+@media (hover: hover) {
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  }
 }
 
 .btn:active {
   transform: translateY(0);
+  opacity: 0.8;
 }
 
 .btn:disabled {
@@ -110,13 +128,25 @@
   color: #2c5f7f;
   font-size: 1rem;
   cursor: pointer;
-  padding: 5px 10px;
+  padding: 10px 15px;
   transition: all 0.2s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(44, 95, 127, 0.2);
+  user-select: none;
+  -webkit-user-select: none;
+  min-width: 44px;
+  min-height: 44px;
 }
 
-.btn-back:hover {
-  color: #1e4a66;
-  transform: translateX(-3px);
+@media (hover: hover) {
+  .btn-back:hover {
+    color: #1e4a66;
+    transform: translateX(-3px);
+  }
+}
+
+.btn-back:active {
+  opacity: 0.6;
 }
 
 .form-group {
@@ -172,11 +202,38 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: rgba(44, 95, 127, 0.2);
+  user-select: none;
+  -webkit-user-select: none;
+  pointer-events: auto;
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
-.bet-option:hover {
-  border-color: #2c5f7f;
-  background: #e8eef5;
+.bet-coin-image {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+@media (hover: hover) {
+  .bet-option:hover {
+    border-color: #2c5f7f;
+    background: #e8eef5;
+  }
+}
+
+.bet-option:active {
+  opacity: 0.7;
+  transform: scale(0.98);
 }
 
 .bet-option.active {

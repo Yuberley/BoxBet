@@ -13,6 +13,22 @@ function GameSetup({ onCreateRoom, onJoinRoom }: GameSetupProps) {
   const [betAmount, setBetAmount] = useState(BET_OPTIONS[0].value);
   const [roomCode, setRoomCode] = useState('');
 
+  // Helper to handle both touch and click events on mobile
+  const createTouchHandler = (callback: () => void) => {
+    return {
+      onClick: () => {
+        console.log('onClick triggered');
+        callback();
+      },
+      onTouchEnd: (e: React.TouchEvent) => {
+        console.log('onTouchEnd triggered');
+        e.preventDefault();
+        e.stopPropagation();
+        callback();
+      }
+    };
+  };
+
   const handleCreateRoom = () => {
     if (nickname.trim().length < 2) {
       alert('El nickname debe tener al menos 2 caracteres');
@@ -43,14 +59,14 @@ function GameSetup({ onCreateRoom, onJoinRoom }: GameSetupProps) {
           <div className="menu-buttons">
             <button 
               className="btn btn-primary"
-              onClick={() => setMode('create')}
+              {...createTouchHandler(() => setMode('create'))}
             >
               Crear Sala
             </button>
             
             <button 
               className="btn btn-secondary"
-              onClick={() => setMode('join')}
+              {...createTouchHandler(() => setMode('join'))}
             >
               Unirse a Sala
             </button>
@@ -66,7 +82,7 @@ function GameSetup({ onCreateRoom, onJoinRoom }: GameSetupProps) {
         <div className="setup-card">
           <button 
             className="btn-back"
-            onClick={() => setMode('menu')}
+            {...createTouchHandler(() => setMode('menu'))}
           >
             ← Volver
           </button>
@@ -88,21 +104,34 @@ function GameSetup({ onCreateRoom, onJoinRoom }: GameSetupProps) {
           <div className="form-group">
             <label>Monto de Apuesta</label>
             <div className="bet-options">
-              {BET_OPTIONS.map((option) => (
-                <button
-                  key={option.value}
-                  className={`bet-option ${betAmount === option.value ? 'active' : ''}`}
-                  onClick={() => setBetAmount(option.value)}
-                >
-                  {option.label}
-                </button>
-              ))}
+              {BET_OPTIONS.map((option) => {
+                // Determinar qué imagen de moneda mostrar según el monto
+                const coinValue = option.value >= 20000 ? 1000 : 
+                                  option.value >= 10000 ? 1000 : 
+                                  option.value >= 5000 ? 500 : 
+                                  option.value >= 2000 ? 200 : 100;
+                return (
+                  <button
+                    key={option.value}
+                    className={`bet-option ${betAmount === option.value ? 'active' : ''}`}
+                    {...createTouchHandler(() => setBetAmount(option.value))}
+                  >
+                    <img 
+                      src={`/${coinValue}.png`} 
+                      alt={option.label} 
+                      className="bet-coin-image"
+                      draggable="false"
+                    />
+                    <span>{option.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           <button 
             className="btn btn-primary btn-large"
-            onClick={handleCreateRoom}
+            {...createTouchHandler(handleCreateRoom)}
             disabled={nickname.trim().length < 2}
           >
             Crear Sala
@@ -118,7 +147,7 @@ function GameSetup({ onCreateRoom, onJoinRoom }: GameSetupProps) {
       <div className="setup-card">
         <button 
           className="btn-back"
-          onClick={() => setMode('menu')}
+          {...createTouchHandler(() => setMode('menu'))}
         >
           ← Volver
         </button>
@@ -151,7 +180,7 @@ function GameSetup({ onCreateRoom, onJoinRoom }: GameSetupProps) {
 
         <button 
           className="btn btn-primary btn-large"
-          onClick={handleJoinRoom}
+          {...createTouchHandler(handleJoinRoom)}
           disabled={nickname.trim().length < 2 || roomCode.length !== 4}
         >
           Unirse

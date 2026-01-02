@@ -15,14 +15,14 @@ function GameBoard({ game, currentPlayerId }: GameBoardProps) {
   const opponent = game.players.find(p => p.id !== currentPlayerId);
 
   const renderCoinImage = useCallback((value: 100 | 200 | 500 | 1000) => {
-    // Emoji o representación de monedas colombianas
-    const coinEmojis: Record<number, string> = {
-      100: '🟡',
-      200: '🟠',
-      500: '🔵',
-      1000: '🟣'
-    };
-    return coinEmojis[value];
+    return (
+      <img 
+        src={`/${value}.png`} 
+        alt={`$${value}`} 
+        className="coin-image"
+        draggable="false"
+      />
+    );
   }, []);
 
   const animateCoinToPlayer = useCallback((row: number, col: number, value: number, playerId: string) => {
@@ -40,7 +40,7 @@ function GameBoard({ game, currentPlayerId }: GameBoardProps) {
     flyingCoin.className = 'flying-coin';
     flyingCoin.innerHTML = `
       <div class="flying-coin-inner">
-        ${renderCoinImage(value as 100 | 200 | 500 | 1000)}
+        <img src="/${value}.png" alt="$${value}" class="coin-image" draggable="false" />
         <div class="flying-coin-value">$${value}</div>
       </div>
     `;

@@ -7,10 +7,30 @@ const app = express();
 app.use(cors());
 
 const httpServer = createServer(app);
+
+// Configuración de CORS para permitir tanto desarrollo local como producción
+const allowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:5174',
+  'https://boxbet.netlify.app',
+  // Agregar aquí el dominio final de Netlify cuando lo tengas
+];
+
 const io = new Server(httpServer, {
   cors: {
-    origin: "http://localhost:5173",
-    methods: ["GET", "POST"]
+    origin: (origin, callback) => {
+      // Permitir requests sin origin (como apps móviles o Postman)
+      if (!origin) return callback(null, true);
+      
+      if (allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        console.log('Blocked origin:', origin);
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    methods: ["GET", "POST"],
+    credentials: true
   }
 });
 
@@ -404,7 +424,31 @@ io.on('connection', (socket) => {
   });
 });
 
-const PORT = 3001;
+// Health check endpoint para verificar que el servidor esté funcionando
+app.get('/health', (req, res) => {
+  res.json({ 
+    status: 'ok', 
+    timestamp: new Date().toISOString(),
+    activeRooms: rooms.size,
+    uptime: process.uptime()
+  });
+});
+
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'BoxBet Socket.io Server',
+    version: '1.0.0',
+    endpoints: {
+      health: '/health',
+      socket: '/socket.io'
+    }
+  });
+});
+
+const PORT = process.env.PORT || 7001;
 httpServer.listen(PORT, () => {
-  console.log(`✅ Servidor ejecutándose en http://localhost:${PORT}`);
+  console.log(`✅ Servidor ejecutándose en http://0.0.0.0:${PORT}`);
+  console.log(`📡 Socket.io listo en puerto ${PORT}`);
+  console.log(`🌐 Local: http://localhost:${PORT}`);
+  console.log(`🌍 Público: http://147.93.184.134:${PORT}`);
 });

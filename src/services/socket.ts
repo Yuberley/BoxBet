@@ -7,7 +7,10 @@ class SocketService {
   connect() {
     if (this.socket?.connected) return this.socket;
 
-    this.socket = io('http://localhost:3001', {
+    // Usar variable de entorno o localhost por defecto
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
+    
+    this.socket = io(socketUrl, {
       transports: ['websocket', 'polling']
     });
 
