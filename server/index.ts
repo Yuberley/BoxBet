@@ -13,6 +13,7 @@ const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:5174',
   'https://boxbet.netlify.app',
+  'https://boxbet.147.93.184.134.nip.io'
   // Agregar aquí el dominio final de Netlify cuando lo tengas
 ];
 
