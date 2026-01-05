@@ -1,17 +1,152 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@import "tailwindcss";
+
+/* Material Symbols Icons */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow-x: hidden;
-  margin: 0;
-  min-width: 320px;
-  min-height: 100vh;
+@theme {
+  /* Colores personalizados */
+  --color-primary: #2c5f7f;
+  --color-primary-dark: #1e4a66;
+  --color-primary-light: #3d7a9f;
+  --color-secondary: #d4af37;
+  --color-secondary-dark: #b8941f;
+  --color-game-bg-start: #1e3a5f;
+  --color-game-bg-end: #0f2942;
+
+  /* Animaciones personalizadas */
+  --animate-dice-shake: diceShake 0.3s ease-in-out;
+  --animate-dice-bounce: diceBounce 0.6s ease;
+  --animate-dice-roll: diceRoll 0.6s ease;
+  --animate-slide-up: slideUp 0.5s ease-out;
+  --animate-slide-down: slideDown 0.5s ease;
+  --animate-fade-in: fadeIn 0.3s ease;
+  --animate-shimmer: shimmer 3s infinite;
+  --animate-bounce-custom: bounce 2s infinite;
+  --animate-spin-custom: spin 1s linear infinite;
+  --animate-dots: dots 1.5s infinite;
+  --animate-pulse-custom: pulse 2s infinite;
+  --animate-coin-win: coinWin 0.6s ease;
+  --animate-edge-placed: edgePlaced 0.3s ease;
+  --animate-captured-reveal: capturedReveal 0.5s ease;
+  --animate-initial-pulse: initialPulse 2s ease-in-out infinite;
+  --animate-badge-bounce: badgeBounce 1s ease infinite;
+}
+
+@keyframes diceShake {
+  0%, 100% { transform: translateY(0) rotateX(0deg) rotateY(0deg); }
+  25% { transform: translateY(-10px) rotateX(20deg) rotateY(-20deg); }
+  50% { transform: translateY(-5px) rotateX(-15deg) rotateY(15deg); }
+  75% { transform: translateY(-8px) rotateX(10deg) rotateY(-10deg); }
+}
+
+@keyframes diceBounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes diceRoll {
+  0% { transform: rotate(0deg) scale(1); }
+  25% { transform: rotate(-15deg) scale(1.1); }
+  50% { transform: rotate(15deg) scale(1.2); }
+  75% { transform: rotate(-10deg) scale(1.1); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-50px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes shimmer {
+  0% { left: -100%; }
+  100% { left: 100%; }
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-5px); }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes coinWin {
+  0% { transform: scale(1) rotate(0deg); }
+  25% { transform: scale(1.15) rotate(-5deg); }
+  50% { transform: scale(1.2) rotate(5deg); }
+  75% { transform: scale(1.15) rotate(-3deg); }
+  100% { transform: scale(1.05) rotate(0deg); }
+}
+
+@keyframes edgePlaced {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes capturedReveal {
+  0% { transform: scale(0) rotate(-180deg); opacity: 0; }
+  60% { transform: scale(1.2) rotate(10deg); }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+
+@keyframes initialPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+@keyframes badgeBounce {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.15) rotate(5deg); }
+}
+
+@layer base {
+  * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+      sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    margin: 0;
+    min-width: 320px;
+    min-height: 100vh;
+  }
 }

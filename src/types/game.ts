@@ -3,6 +3,7 @@ export interface Player {
   nickname: string;
   money: number;
   color: string;
+  avatarId?: string; // ID del avatar predefinido
 }
 
 export interface Edge {
@@ -13,7 +14,7 @@ export interface Edge {
 }
 
 export interface Coin {
-  value: 100 | 200 | 500 | 1000;
+  value: 100 | 200 | 500 | 1000 | 2000 | 5000;
   owner: string | null;
 }
 
@@ -38,7 +39,6 @@ export interface BetOption {
 
 export const BET_OPTIONS: BetOption[] = [
   { label: "1.000 COP", value: 1000 },
-  { label: "2.000 COP", value: 2000 },
   { label: "5.000 COP", value: 5000 },
   { label: "10.000 COP", value: 10000 },
   { label: "20.000 COP", value: 20000 }

@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html class="dark" lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BoxBet - Resultados del Juego</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#3b82f6", // Blue 500
+                        "primary-hover": "#2563eb", // Blue 600
+                        "background-light": "#f0f9ff", // Sky 50
+                        "background-dark": "#0f172a", // Slate 900
+                        "surface-dark": "#1e293b", // Slate 800
+                        "border-dark": "#334155", // Slate 700
+                        "text-muted-dark": "#94a3b8", // Slate 400
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"],
+                        "body": ["Noto Sans", "sans-serif"],
+                    },
+                    borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white font-display min-h-screen flex flex-col overflow-x-hidden">
+<header class="flex items-center justify-between whitespace-nowrap border-b border-solid border-slate-200 dark:border-border-dark px-10 py-4 bg-background-light dark:bg-slate-900 sticky top-0 z-50">
+<div class="flex items-center gap-4 text-slate-900 dark:text-white">
+<div class="size-8 text-primary">
+<svg class="w-full h-full" fill="none" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M24 4H42V17.3333V30.6667H24V44H6V30.6667V17.3333H24V4Z" fill="currentColor" fill-rule="evenodd"></path>
+</svg>
+</div>
+<h2 class="text-xl font-bold leading-tight tracking-[-0.015em]">BoxBet</h2>
+</div>
+<div class="flex items-center gap-8">
+<div class="hidden md:flex items-center gap-9">
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Reglas</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Ranking Global</a>
+<a class="text-sm font-medium hover:text-primary transition-colors" href="#">Historial</a>
+</div>
+<div class="flex items-center gap-4">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full size-10 border-2 border-primary/20" data-alt="User profile avatar" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuD51f3sGwmzSInvNBxk0ylCsHFtZ3r50brM5VEo1NddMhiGHr3BcHt-QIl_dhXiCjEhC3nuN1qwf3dLXhuKfbCKlIRle2Vj3w-hht8wrvZJmMMjYQ-p2bf46hETkXqqZ0Mm0PJC9w72GSkcm9zzpmG5NGnxObQlMTZ59pO59nblWW9xAGnCiJpmKvPcRAMGyO63NLUXOtWjMeYPTgbQyh-ik9aINI-srOAmLywabQWRuz_tOP0RFIh6AWqUSjxeNhZn9vHqmUDh3Ec");'></div>
+</div>
+</div>
+</header>
+<main class="flex-1 flex flex-col items-center justify-center p-6 md:p-10 lg:px-40 gap-8">
+<div class="w-full max-w-4xl text-center animate-fade-in-up">
+<div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary font-bold text-sm mb-4 border border-primary/20 uppercase tracking-wider">
+<span class="material-symbols-outlined text-sm">emoji_events</span>
+            Partida Finalizada
+        </div>
+<h1 class="text-4xl md:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white mb-2">
+            ¡Victoria <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-cyan-400">Absoluta!</span>
+</h1>
+<p class="text-slate-500 dark:text-text-muted-dark text-lg">La mesa ha hablado. Aquí están los resultados finales.</p>
+</div>
+<div class="w-full max-w-lg relative group">
+<div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-cyan-500 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+<div class="relative w-full bg-white dark:bg-surface-dark rounded-2xl p-8 border border-slate-200 dark:border-slate-700 flex flex-col items-center gap-6 shadow-xl">
+<div class="relative">
+<div class="absolute -top-6 -right-4 bg-yellow-400 text-yellow-900 size-10 flex items-center justify-center rounded-full shadow-lg z-10 animate-bounce">
+<span class="material-symbols-outlined filled">crown</span>
+</div>
+<div class="size-32 rounded-full p-1 bg-gradient-to-br from-primary via-blue-400 to-cyan-300">
+<div class="w-full h-full rounded-full bg-cover bg-center border-4 border-white dark:border-surface-dark" data-alt="Winner profile picture showing a smiling man" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAvWe96Jm5WA6scFVu19KLdL9_hJ_-XadcvWtN0q2OyHkgq3HoJy7j4SnNNNUBLEHlBG7KTg8Wp3ZcUJ-GIajScl7mgl_0HBAS9NkXw4t8J9nCIFHlu2D1VDSA8LRPBgoWETPkQydEWuZ6p68oh23NG_UIGg6_SRm--2h_r9phyxV7-7LFBidLQU7VYM6sf9JnUeMQ_eblD7aWUzTXip3jObkMKcj-XpossUFC82QNEsaixL8wsWtE3bRWhcukMhNbIO6UiGuQJjKU");'></div>
+</div>
+</div>
+<div class="text-center space-y-1">
+<h2 class="text-3xl font-bold text-slate-900 dark:text-white">Juan P.</h2>
+<p class="text-primary font-medium text-lg uppercase tracking-wide">Ganador de la Partida</p>
+</div>
+<div class="flex flex-col items-center justify-center w-full py-4 border-y border-slate-100 dark:border-border-dark">
+<span class="text-slate-500 dark:text-text-muted-dark text-sm font-medium uppercase tracking-wider mb-1">Premio Total</span>
+<span class="text-4xl font-extrabold text-slate-900 dark:text-white font-display tabular-nums">$15.000 COP</span>
+</div>
+<div class="grid grid-cols-2 gap-4 w-full">
+<div class="bg-slate-50 dark:bg-slate-900 rounded-xl p-3 text-center">
+<p class="text-xs text-slate-500 dark:text-text-muted-dark">Racha Victorias</p>
+<p class="font-bold text-xl text-slate-900 dark:text-white">3</p>
+</div>
+<div class="bg-slate-50 dark:bg-slate-900 rounded-xl p-3 text-center">
+<p class="text-xs text-slate-500 dark:text-text-muted-dark">Precisión</p>
+<p class="font-bold text-xl text-slate-900 dark:text-white">92%</p>
+</div>
+</div>
+</div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-4xl">
+<div class="flex flex-col gap-1 bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
+<div class="flex items-center gap-2 text-slate-500 dark:text-text-muted-dark">
+<span class="material-symbols-outlined text-xl">savings</span>
+<span class="text-sm font-medium">Pozo Acumulado</span>
+</div>
+<p class="text-2xl font-bold text-slate-900 dark:text-white">$45.000 COP</p>
+</div>
+<div class="flex flex-col gap-1 bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
+<div class="flex items-center gap-2 text-slate-500 dark:text-text-muted-dark">
+<span class="material-symbols-outlined text-xl">timer</span>
+<span class="text-sm font-medium">Duración</span>
+</div>
+<p class="text-2xl font-bold text-slate-900 dark:text-white">14m 20s</p>
+</div>
+<div class="flex flex-col gap-1 bg-white dark:bg-surface-dark p-5 rounded-xl border border-slate-200 dark:border-border-dark shadow-sm">
+<div class="flex items-center gap-2 text-slate-500 dark:text-text-muted-dark">
+<span class="material-symbols-outlined text-xl">refresh</span>
+<span class="text-sm font-medium">Rondas</span>
+</div>
+<p class="text-2xl font-bold text-slate-900 dark:text-white">12</p>
+</div>
+</div>
+<div class="w-full max-w-4xl bg-white dark:bg-surface-dark rounded-2xl overflow-hidden border border-slate-200 dark:border-border-dark shadow-sm mt-4">
+<div class="p-6 border-b border-slate-200 dark:border-border-dark flex justify-between items-center">
+<h3 class="text-xl font-bold text-slate-900 dark:text-white">Tabla de Posiciones</h3>
+<button class="text-sm text-primary font-medium hover:text-cyan-400">Ver detalles completos</button>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors border-b border-slate-100 dark:border-slate-700/50">
+<div class="flex items-center gap-4">
+<div class="flex items-center justify-center size-8 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-text-muted-dark font-bold text-sm">2</div>
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-10" data-alt="Profile picture of ranking player 2" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAIomS4uSnLE4QtHsGBwy_fa-DR4ULJcD6t1nUTslNUQBIvWOxVjpeiBe5OTdwC-H1_IRNOMq6DBFJ4afP27kjbgOEieLXd73QKGjvbSroDkvf6J61y0-3FoChM4FJyhZLCi-NO54zdc3rpgwk1niwdwbHTem2p5I65D7yRfelNcQ1yuzzZ6LXyH1VkITn7RbfspnVo-3K_wPE8HyVajDcr5HmDkeZf0V7MQcH3kssVx1hkYcDE_Y8Hpww2w9Qb5fsXrnNiyPbBXoo");'></div>
+<div>
+<p class="font-bold text-slate-900 dark:text-white">Maria G.</p>
+<p class="text-xs text-slate-500 dark:text-text-muted-dark">Estratega</p>
+</div>
+</div>
+<div class="text-right">
+<p class="font-bold text-slate-900 dark:text-white text-lg">$12.500</p>
+<p class="text-xs text-green-500 flex items-center justify-end gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_up</span> +$2.500
+                    </p>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors border-b border-slate-100 dark:border-slate-700/50">
+<div class="flex items-center justify-center size-8 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-text-muted-dark font-bold text-sm">3</div>
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-10" data-alt="Profile picture of ranking player 3" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuAxX4YbpElrvgauPymgJTAC_ywjk0EW19u6v2Q0Ln19lW8o2ziX_T9q99YeePDdIb-ldtFHy7WHsFBOrfoeSFTTPG6hdX-EdTCV9NxnhBNRkZ18lRrV8dH7Cu4LubLmoCgFl-jAY-tXPlSmD_ZowaGpxPvPbfwfiyBa1ply2MAHztnIVIg_RTB2Pzxnmh1GdmED99fl0ByBNiohn0bOCqy7jUczh_Jwe6A97Xo0a9KpVQAqJaXBTT6GVEHk8q-5l7rPJW0uuBe0WFo");'></div>
+<div>
+<p class="font-bold text-slate-900 dark:text-white">Carlos R.</p>
+<p class="text-xs text-slate-500 dark:text-text-muted-dark">Novato del año</p>
+</div>
+<div class="text-right">
+<p class="font-bold text-slate-900 dark:text-white text-lg">$8.200</p>
+<p class="text-xs text-slate-500 dark:text-text-muted-dark">-</p>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+<div class="flex items-center justify-center size-8 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-text-muted-dark font-bold text-sm">4</div>
+<div class="bg-center bg-no-repeat bg-cover rounded-full size-10" data-alt="Profile picture of ranking player 4" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuADQOVYAeKrH38N24JY2UlEAvtuXvI0D109ROQ_JBDB6mnsLmcUxhUHfSv_NXw7uOgudDj3d8UhzpQNNqIY4ceP4-jfr8v134v-cK-8v9j-NNa_Ii65iRm-bus3EcSOiwzkKM8xH_ikN5Y48tZdFn8dbpueoA4pHejl29n0urR41hxI3DOXqpCNXoWwzBfoGMjj5vZwzkVGghWfycsdJhhPTOQ6y49DL3YOI1m7UW519ly9awch0tiFPCkG39AVfTkrTilgITY-zu8");'></div>
+<div>
+<p class="font-bold text-slate-900 dark:text-white">Ana L.</p>
+<p class="text-xs text-slate-500 dark:text-text-muted-dark">Rápida y Furiosa</p>
+</div>
+<div class="text-right">
+<p class="font-bold text-slate-900 dark:text-white text-lg">$4.100</p>
+<p class="text-xs text-red-500 flex items-center justify-end gap-1">
+<span class="material-symbols-outlined text-[14px]">trending_down</span> -$500
+                    </p>
+</div>
+</div>
+</div>
+</div>
+<div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 w-full max-w-[90%] md:max-w-md">
+<div class="flex gap-3 p-2 bg-white/80 dark:bg-surface-dark/80 backdrop-blur-md rounded-full shadow-2xl border border-slate-200 dark:border-slate-600">
+<button class="flex-1 flex items-center justify-center gap-2 bg-transparent hover:bg-slate-100 dark:hover:bg-white/10 text-slate-700 dark:text-white font-bold py-3 px-6 rounded-full transition-all">
+<span class="material-symbols-outlined">home</span>
+<span class="hidden sm:inline">Menú</span>
+</button>
+<button class="flex-[2] flex items-center justify-center gap-2 bg-primary hover:bg-primary-hover text-white font-bold py-3 px-8 rounded-full shadow-lg shadow-primary/30 transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+<span class="material-symbols-outlined">replay</span>
+                Jugar de Nuevo
+            </button>
+</div>
+</div>
+<div class="h-24 w-full"></div>
+</main>
+
+</body></html>

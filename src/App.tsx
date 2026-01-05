@@ -143,7 +143,7 @@ function App() {
   }
 
   if (appState === 'waiting' && game) {
-    return <WaitingRoom roomCode={game.roomCode} nickname={nickname} />;
+    return <WaitingRoom roomCode={game.roomCode} nickname={nickname} betAmount={game.betAmount} />;
   }
 
   if (appState === 'playing' && game) {

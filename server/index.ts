@@ -51,7 +51,7 @@ interface Edge {
 }
 
 interface Coin {
-  value: 100 | 200 | 500 | 1000;
+  value: 100 | 200 | 500 | 1000 | 2000 | 5000;
   owner: string | null;
 }
 
@@ -83,92 +83,98 @@ function generateRoomCode(): string {
 
 // Generar tablero de monedas basado en la apuesta
 function generateCoins(betAmount: number): { coins: Coin[][], gridSize: number } {
-  // Determinar tamaño del tablero según la apuesta
-  let gridSize: number;
   const totalValue = betAmount * 2; // Total del tablero (ambos jugadores)
   
+  // Determinar tamaño del tablero según el total
+  let gridSize: number;
   if (totalValue <= 10000) {
-    gridSize = 3;
+    gridSize = 3; // 9 celdas
   } else if (totalValue <= 30000) {
-    gridSize = 4;
+    gridSize = 4; // 16 celdas
   } else {
-    gridSize = 5;
+    gridSize = 5; // 25 celdas
   }
 
-  const denominations: Array<100 | 200 | 500 | 1000> = [1000, 500, 200, 100]; // Ordenado de mayor a menor
-  const coins: Coin[][] = [];
   const totalCells = gridSize * gridSize;
-  const coinValues: Array<100 | 200 | 500 | 1000> = [];
+  const denominations: Array<100 | 200 | 500 | 1000 | 2000 | 5000> = [5000, 2000, 1000, 500, 200, 100];
+  const coinValues: Array<100 | 200 | 500 | 1000 | 2000 | 5000> = [];
   
   let remaining = totalValue;
   
-  // Estrategia: usar monedas grandes primero, luego ajustar con monedas más pequeñas
-  // Llenar el tablero mientras queden espacios y dinero
-  while (coinValues.length < totalCells && remaining > 0) {
-    if (coinValues.length === totalCells - 1) {
-      // Última moneda: debe ser exactamente el valor restante
-      if (remaining === 100 || remaining === 200 || remaining === 500 || remaining === 1000) {
-        coinValues.push(remaining as 100 | 200 | 500 | 1000);
+  // Algoritmo mejorado: usar greedy para la mayoría, ajustar al final
+  while (coinValues.length < totalCells) {
+    const cellsLeft = totalCells - coinValues.length;
+    
+    if (cellsLeft === 1) {
+      // Última celda: poner exactamente el valor restante
+      // Si remaining no es una denominación válida, necesitamos ajustar
+      if (denominations.includes(remaining as any)) {
+        coinValues.push(remaining as any);
         remaining = 0;
-      } else if (remaining >= 1000) {
-        coinValues.push(1000);
-        remaining -= 1000;
-      } else if (remaining >= 500) {
-        coinValues.push(500);
-        remaining -= 500;
-      } else if (remaining >= 200) {
-        coinValues.push(200);
-        remaining -= 200;
       } else {
-        coinValues.push(100);
-        remaining -= 100;
-      }
-    } else {
-      // Intentar usar la denominación más grande posible que quepa
-      let added = false;
-      for (const denom of denominations) {
-        // Verificar que con esta moneda no nos quedemos sin opciones para las celdas restantes
-        const cellsLeft = totalCells - coinValues.length - 1;
-        const minRemainingNeeded = cellsLeft * 100; // Mínimo valor para llenar celdas restantes
+        // Buscar la mayor denominación que quepa y ajustar retroactivamente
+        const bestDenom = denominations.find(d => d <= remaining) || 100;
+        coinValues.push(bestDenom);
+        remaining -= bestDenom;
         
-        if (denom <= remaining && (remaining - denom) >= minRemainingNeeded) {
-          coinValues.push(denom);
-          remaining -= denom;
-          added = true;
-          break;
+        // Si aún sobra, necesitamos ajustar monedas previas
+        // Esto es un caso edge que idealmente no debería ocurrir con buena distribución
+        if (remaining > 0) {
+          console.warn(`Ajustando distribución: remaining=${remaining}`);
+          // Agregar el restante a la última moneda si es posible
+          const last = coinValues[coinValues.length - 1];
+          const newValue = last + remaining;
+          if (denominations.includes(newValue as any)) {
+            coinValues[coinValues.length - 1] = newValue as any;
+            remaining = 0;
+          }
         }
       }
+      break;
+    }
+    
+    // Calcular el promedio necesario por celda restante
+    const avgNeeded = remaining / cellsLeft;
+    
+    // Seleccionar la mejor denominación
+    let bestDenom: 100 | 200 | 500 | 1000 | 2000 | 5000 = 100;
+    let bestScore = Infinity;
+    
+    for (const denom of denominations) {
+      // Verificar que podemos usar esta denominación
+      const afterUsing = remaining - denom;
+      const minNeededForRest = (cellsLeft - 1) * 100;
       
-      // Si no pudimos agregar ninguna, usar la más pequeña
-      if (!added) {
-        coinValues.push(100);
-        remaining -= 100;
+      if (denom <= remaining && afterUsing >= minNeededForRest) {
+        // Score basado en qué tan cerca está del promedio
+        const score = Math.abs(denom - avgNeeded);
+        if (score < bestScore) {
+          bestScore = score;
+          bestDenom = denom;
+        }
       }
     }
+    
+    coinValues.push(bestDenom);
+    remaining -= bestDenom;
   }
+
+  // Verificación final
+  const sum = coinValues.reduce((acc, val) => acc + val, 0);
+  console.log(`Apuesta total: ${totalValue}, Suma monedas: ${sum}, Celdas: ${totalCells}, Diferencia: ${sum - totalValue}`);
   
-  // Si sobra dinero, distribuirlo aumentando valores de monedas existentes
-  while (remaining > 0 && coinValues.length > 0) {
-    for (let i = 0; i < coinValues.length && remaining > 0; i++) {
-      const current = coinValues[i];
-      if (current === 100 && remaining >= 100) {
-        coinValues[i] = 200;
-        remaining -= 100;
-      } else if (current === 200 && remaining >= 300) {
-        coinValues[i] = 500;
-        remaining -= 300;
-      } else if (current === 500 && remaining >= 500) {
-        coinValues[i] = 1000;
-        remaining -= 500;
-      }
-    }
-    // Si no pudimos distribuir más, salir
-    if (remaining > 0) {
-      // Agregar monedas de 100 si aún hay espacio
-      if (coinValues.length < totalCells) {
-        coinValues.push(100);
-        remaining -= 100;
-      } else {
+  // Si hay diferencia, ajustar
+  if (sum !== totalValue) {
+    const diff = totalValue - sum;
+    console.warn(`Ajustando diferencia de ${diff}`);
+    
+    // Buscar una moneda que podamos ajustar
+    for (let i = coinValues.length - 1; i >= 0; i--) {
+      const currentValue = coinValues[i];
+      const newValue = currentValue + diff;
+      
+      if (denominations.includes(newValue as any) && newValue > 0) {
+        coinValues[i] = newValue as any;
         break;
       }
     }
@@ -181,6 +187,7 @@ function generateCoins(betAmount: number): { coins: Coin[][], gridSize: number }
   }
 
   // Crear matriz de monedas
+  const coins: Coin[][] = [];
   let index = 0;
   for (let row = 0; row < gridSize; row++) {
     coins[row] = [];
