@@ -31,7 +31,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
   // State
   const [edges, setEdges] = useState<LocalEdge[]>([]);
   const [boxes, setBoxes] = useState<LocalBox[]>([]);
-  const [diceValue, setDiceValue] = useState<number>(0);
+  const [diceValue, setDiceValue] = useState<number | null>(null);
   const [isRolling, setIsRolling] = useState(false);
   const [remainingMoves, setRemainingMoves] = useState(0);
   const [turnTimer, setTurnTimer] = useState(30);
@@ -455,15 +455,18 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
               style={{
                 left: `calc((${col} + 0.5) * ${cellSize})`,
                 top: `calc((${row} + 0.5) * ${cellSize})`,
-                width: `calc(${cellSize} * 0.7)`,
-                height: `calc(${cellSize} * 0.7)`,
+                width: `calc(${cellSize} * 0.49)`,
+                height: `calc(${cellSize} * 0.49)`,
                 transform: 'translate(-50%, -50%)'
               }}
             >
               <div
                 className={`w-full h-full ${shape} flex flex-col items-center justify-center font-bold ${
                   coinColor
-                } ${textColor} ${borderStyle} shadow-lg`}
+                } ${textColor} ${borderStyle}`}
+                style={{
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.3)'
+                }}
               >
                 <span className="text-xs">$</span>
                 <span className="text-sm leading-none font-extrabold">{coinDisplay}</span>
@@ -587,55 +590,6 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
             </div>
           </div>
         </div>
-
-        {/* Sección de dado - solo para usuario actual */}
-        {isCurrentUser && (
-          <div className="mt-4 rounded-xl p-5 border border-slate-700" style={{ background: '#020617' }}>
-            <div className="flex justify-between items-center mb-4">
-              <span className="text-white/60 text-sm font-medium uppercase tracking-wider">Lanzar Dado</span>
-              <span className="text-xs bg-slate-700 px-2 py-0.5 rounded text-white/40">1d6</span>
-            </div>
-            <div className="flex gap-4">
-              <button
-                onClick={handleRollDice}
-                disabled={!isMyTurn || isRolling || remainingMoves > 0}
-                className={`flex-1 h-14 rounded-xl flex items-center justify-center gap-2 font-bold text-lg shadow-lg transition-all group ${
-                  isMyTurn && !isRolling && remainingMoves === 0
-                    ? 'bg-cyan-400 hover:bg-sky-500 text-slate-900 shadow-sky-900/20 active:scale-95'
-                    : 'bg-slate-700 text-slate-500 cursor-not-allowed'
-                }`}
-              >
-                <span className={`material-symbols-outlined transition-transform duration-500 ${
-                  isRolling ? 'animate-spin' : 'group-hover:rotate-180'
-                }`}>
-                  casino
-                </span>
-                {isRolling ? 'GIRANDO...' : 'LANZAR'}
-              </button>
-              <div className="w-14 h-14 bg-slate-950 rounded-xl border border-slate-700 flex items-center justify-center">
-                <Dice value={diceValue} isRolling={isRolling} />
-              </div>
-            </div>
-
-            {/* Movimientos y timer cuando hay movimientos restantes */}
-            {remainingMoves > 0 && (
-              <div className="mt-4 p-3 bg-slate-950/50 rounded-lg border border-cyan-400/30">
-                <div className="flex justify-between items-center mb-2">
-                  <span className="text-xs text-slate-400 uppercase tracking-wider">Movimientos</span>
-                  <span className="text-2xl font-bold text-cyan-400">{remainingMoves}</span>
-                </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-xs text-slate-500">Tiempo restante</span>
-                  <div className={`font-mono font-bold ${
-                    placementTimer <= 10 ? 'text-red-400 animate-pulse' : 'text-yellow-400'
-                  }`}>
-                    {Math.floor(placementTimer / 60)}:{(placementTimer % 60).toString().padStart(2, '0')}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
       </div>
     );
   };
@@ -708,32 +662,71 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
       {/* Main game area */}
       <div className="flex-1 flex flex-col lg:flex-row items-stretch justify-center p-4 gap-4 lg:gap-6 min-h-0 overflow-auto lg:overflow-hidden">
         
-        {/* Desktop: Left side - Player panels (20%) */}
+        {/* Desktop: Left side - Current player + Dice (25%) */}
         {/* Mobile: Hidden, shown at bottom */}
-        <div className="hidden lg:flex lg:flex-col lg:w-[20%] gap-4 justify-center">
-          {/* Current player panel */}
-          <div className="flex items-center justify-center">
-            <PlayerPanel 
-              player={currentPlayer} 
-              score={myScore} 
-              isCurrentUser={true}
-              isActive={isMyTurn}
-            />
+        <div className="hidden lg:flex lg:flex-col lg:w-[25%] gap-4 items-center justify-center">
+          <div className="w-full max-w-sm space-y-4">
+            {/* Current player panel */}
+            <div className="flex-shrink-0">
+              <PlayerPanel 
+                player={currentPlayer} 
+                score={myScore} 
+                isCurrentUser={true}
+                isActive={isMyTurn}
+              />
+            </div>
+            
+            {/* Dice section */}
+            <div className="flex-shrink-0 rounded-xl p-5 border border-slate-700" style={{ background: '#020617' }}>
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-white/60 text-sm font-medium uppercase tracking-wider">Lanzar Dado</span>
+              <span className="text-xs bg-slate-700 px-2 py-0.5 rounded text-white/40">1d6</span>
+            </div>
+            <div className="flex gap-4">
+              <button
+                onClick={handleRollDice}
+                disabled={!isMyTurn || isRolling || remainingMoves > 0}
+                className={`flex-1 h-14 rounded-xl flex items-center justify-center gap-2 font-bold text-lg shadow-lg transition-all group ${
+                  isMyTurn && !isRolling && remainingMoves === 0
+                    ? 'bg-cyan-400 hover:bg-sky-500 text-slate-900 shadow-sky-900/20 active:scale-95'
+                    : 'bg-slate-700 text-slate-500 cursor-not-allowed'
+                }`}
+              >
+                <span className={`material-symbols-outlined transition-transform duration-500 ${
+                  isRolling ? 'animate-spin' : 'group-hover:rotate-180'
+                }`}>
+                  casino
+                </span>
+                {isRolling ? 'GIRANDO...' : 'LANZAR'}
+              </button>
+              <div className="w-14 h-14 bg-slate-950 rounded-xl border border-slate-700 flex items-center justify-center">
+                <Dice value={diceValue} isRolling={isRolling} />
+              </div>
+            </div>
+
+            {/* Movimientos y timer cuando hay movimientos restantes */}
+            {remainingMoves > 0 && (
+              <div className="mt-4 p-3 bg-slate-950/50 rounded-lg border border-cyan-400/30">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs text-slate-400 uppercase tracking-wider">Movimientos</span>
+                  <span className="text-2xl font-bold text-cyan-400">{remainingMoves}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-xs text-slate-500">Tiempo restante</span>
+                  <div className={`font-mono font-bold ${
+                    placementTimer <= 10 ? 'text-red-400 animate-pulse' : 'text-yellow-400'
+                  }`}>
+                    {Math.floor(placementTimer / 60)}:{(placementTimer % 60).toString().padStart(2, '0')}
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
-          
-          {/* Opponent panel */}
-          <div className="flex items-center justify-center">
-            <PlayerPanel 
-              player={opponent} 
-              score={opponentScore} 
-              isCurrentUser={false}
-              isActive={!isMyTurn && !!opponent}
-            />
           </div>
         </div>
 
-        {/* Game board container - 55% on desktop, full width on mobile */}
-        <div className="flex-1 lg:w-[55%] flex flex-col items-center justify-center">
+        {/* Game board container - 50% on desktop, full width on mobile */}
+        <div className="flex-1 lg:w-[50%] flex flex-col items-center justify-center">
           {/* Game board */}
           <div 
             className="relative rounded-2xl border border-white/10 w-full"
@@ -741,7 +734,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
               background: '#1E293B',
               maxWidth: 'min(95vw, 80vh)',
               aspectRatio: '1 / 1',
-              padding: 'clamp(1.5rem, 4vw, 4rem)'
+              padding: 'clamp(0.9rem, 2.4vw, 2.4rem)'
             }}
           >
             {/* Dot pattern background */}
@@ -776,26 +769,37 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
           </div>
         </div>
 
-        {/* Desktop: Right side - Game History (25%) */}
-        <div className="hidden lg:flex lg:w-[25%] items-start justify-center pt-4">
-          <div className="w-full max-w-sm">
-            <div className="bg-slate-800 rounded-xl p-4 border border-slate-700 h-full max-h-[600px] flex flex-col">
-              <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3">Historial de Juego</div>
-              <div className="flex-1 overflow-y-auto space-y-3 pr-2">
-                {/* Placeholder para historial - se puede llenar dinámicamente */}
+        {/* Desktop: Right side - Opponent + Game History (25%) */}
+        <div className="hidden lg:flex lg:flex-col lg:w-[25%] gap-4 items-center justify-center">
+          <div className="w-full max-w-sm space-y-4">
+            {/* Opponent panel */}
+            <div className="flex-shrink-0">
+              <PlayerPanel 
+                player={opponent} 
+                score={opponentScore} 
+                isCurrentUser={false}
+                isActive={!isMyTurn && !!opponent}
+              />
+            </div>
+            
+            {/* Game History with scrollable content */}
+            <div className="bg-slate-800 rounded-xl p-4 border border-slate-700 flex flex-col" style={{ maxHeight: '300px' }}>
+              <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 flex-shrink-0">Historial de Juego</div>
+              <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-thin">
+              {/* Placeholder para historial - se puede llenar dinámicamente */}
+              <div className="flex gap-2 text-sm">
+                <span className="text-cyan-400 font-bold">{currentPlayer?.nickname}</span>
+                <span className="text-slate-400">inició la partida.</span>
+              </div>
+              {remainingMoves > 0 && (
                 <div className="flex gap-2 text-sm">
                   <span className="text-cyan-400 font-bold">{currentPlayer?.nickname}</span>
-                  <span className="text-slate-400">inició la partida.</span>
+                  <span className="text-slate-400">lanzó el dado: </span>
+                  <span className="text-yellow-400 font-bold">{diceValue}</span>
                 </div>
-                {remainingMoves > 0 && (
-                  <div className="flex gap-2 text-sm">
-                    <span className="text-cyan-400 font-bold">{currentPlayer?.nickname}</span>
-                    <span className="text-slate-400">lanzó el dado: </span>
-                    <span className="text-yellow-400 font-bold">{diceValue}</span>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
+          </div>
           </div>
         </div>
 

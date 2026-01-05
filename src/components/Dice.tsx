@@ -28,6 +28,10 @@ function Dice({ value, isRolling }: DiceProps) {
     const baseY = randomRotations * 360;
     
     const finalRotation = faceRotations[value];
+    
+    // Validar que finalRotation existe antes de usarlo
+    if (!finalRotation) return;
+    
     const newRotation = {
       x: baseX + finalRotation.x,
       y: baseY + finalRotation.y,
