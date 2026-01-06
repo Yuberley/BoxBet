@@ -118,6 +118,10 @@ function App() {
     });
 
     socketService.onError((data) => {
+      // Silenciar el error de "Ya tiraste el dado" cuando es auto-roll
+      if (data.message === 'Ya tiraste el dado') {
+        return; // No mostrar alerta
+      }
       alert(data.message);
     });
 

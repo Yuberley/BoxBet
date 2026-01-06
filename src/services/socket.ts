@@ -8,10 +8,35 @@ class SocketService {
     if (this.socket?.connected) return this.socket;
 
     // Usar variable de entorno o localhost por defecto
-    const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:3001';
+    const socketUrl = import.meta.env.VITE_SOCKET_URL || 'http://localhost:7001';
+    
+    console.log('🔌 Conectando a Socket.IO:', socketUrl);
     
     this.socket = io(socketUrl, {
-      transports: ['websocket', 'polling']
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
+      reconnectionAttempts: 10,
+      timeout: 20000
+    });
+
+    // Event listeners para debugging
+    this.socket.on('connect', () => {
+      console.log('✅ Conectado a Socket.IO');
+    });
+
+    this.socket.on('connect_error', (error) => {
+      console.error('❌ Error de conexión Socket.IO:', error.message);
+      console.log('💡 Asegúrate de que el servidor esté corriendo en', socketUrl);
+    });
+
+    this.socket.on('disconnect', (reason) => {
+      console.log('🔌 Desconectado de Socket.IO:', reason);
+    });
+
+    this.socket.on('reconnect', (attemptNumber) => {
+      console.log('🔄 Reconectado después de', attemptNumber, 'intentos');
     });
 
     return this.socket;

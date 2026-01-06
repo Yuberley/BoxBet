@@ -34,8 +34,8 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
   const [diceValue, setDiceValue] = useState<number | null>(null);
   const [isRolling, setIsRolling] = useState(false);
   const [remainingMoves, setRemainingMoves] = useState(0);
-  const [turnTimer, setTurnTimer] = useState(30);
-  const [placementTimer, setPlacementTimer] = useState(90);
+  const [unifiedTimer, setUnifiedTimer] = useState(30);
+  const [timerPhase, setTimerPhase] = useState<'waiting-dice' | 'placing-moves'>('waiting-dice');
   const [gameOver, setGameOver] = useState(false);
   const [winner, setWinner] = useState<Player | null>(null);
 
@@ -129,8 +129,12 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
     if (game?.diceValue !== null && game?.diceValue !== undefined && game.diceValue > 0) {
       // Solo actualizar si el valor cambió
       if (diceValue !== game.diceValue) {
-        setDiceValue(game.diceValue);
-        setPlacementTimer(90); // Reset placement timer when dice is rolled
+        // Retrasar la visualización del valor hasta que termine la animación (3s)
+        setTimeout(() => {
+          setDiceValue(game.diceValue);
+          setTimerPhase('placing-moves');
+          setUnifiedTimer(90); // 90 seconds to place moves
+        }, 3000);
       }
     }
   }, [game?.diceValue, diceValue]);
@@ -144,7 +148,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
     }
   }, [game?.diceValue, game?.edgesPlaced]);
 
-  // Calculate scores
+  // Calculate scores (coin count)
   const myScore = useMemo(() => {
     return boxes.filter(b => b.owner === myNickname).length;
   }, [boxes, myNickname]);
@@ -153,41 +157,53 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
     return boxes.filter(b => b.owner && b.owner !== myNickname).length;
   }, [boxes, myNickname]);
 
-  // Turn timer
+  // Calculate money earned
+  const myMoneyEarned = useMemo(() => {
+    let total = 0;
+    boxes.forEach(box => {
+      if (box.owner === myNickname) {
+        const coinValue = game?.coins?.[box.row]?.[box.col]?.value || 0;
+        total += coinValue;
+      }
+    });
+    return total;
+  }, [boxes, myNickname, game?.coins]);
+
+  const opponentMoneyEarned = useMemo(() => {
+    let total = 0;
+    boxes.forEach(box => {
+      if (box.owner && box.owner !== myNickname) {
+        const coinValue = game?.coins?.[box.row]?.[box.col]?.value || 0;
+        total += coinValue;
+      }
+    });
+    return total;
+  }, [boxes, myNickname, game?.coins]);
+
+  // Unified timer effect
   useEffect(() => {
     if (!isMyTurn || gameOver) return;
 
     const timer = setInterval(() => {
-      setTurnTimer(prev => {
+      setUnifiedTimer(prev => {
         if (prev <= 1) {
-          return 30;
+          // Time's up!
+          if (timerPhase === 'waiting-dice') {
+            // Auto-roll the dice
+            handleRollDice();
+            return 90; // Start placement phase
+          } else {
+            // Auto-place remaining moves
+            placeRemainingEdgesRandomly();
+            return 30; // Back to waiting for dice
+          }
         }
         return prev - 1;
       });
     }, 1000);
 
     return () => clearInterval(timer);
-  }, [isMyTurn, gameOver]);
-
-  // Placement timer - 90 seconds to place edges after rolling dice
-  useEffect(() => {
-    if (!isMyTurn || gameOver) return;
-    // Only run timer if dice has been rolled (diceValue is not null)
-    if (game?.diceValue === null) return;
-
-    const timer = setInterval(() => {
-      setPlacementTimer(prev => {
-        if (prev <= 1) {
-          // Time's up! Place remaining edges randomly
-          placeRemainingEdgesRandomly();
-          return 90;
-        }
-        return prev - 1;
-      });
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [isMyTurn, gameOver, game?.diceValue, game?.currentTurn]);
+  }, [isMyTurn, gameOver, timerPhase]);
 
   // Function to place remaining edges randomly
   const placeRemainingEdgesRandomly = useCallback(() => {
@@ -206,10 +222,10 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
     }
   }, [remainingMoves, edges]);
 
-  // Reset timers on turn change
+  // Reset timer on turn change
   useEffect(() => {
-    setTurnTimer(30);
-    setPlacementTimer(90);
+    setUnifiedTimer(30);
+    setTimerPhase('waiting-dice');
   }, [game?.currentTurn]);
 
   // Socket listeners for opponent moves
@@ -238,10 +254,10 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
     // Emit roll dice event to server - server will generate the value
     socketService.rollDice(game.roomCode);
 
-    // Animation delay
+    // Animation delay (3 seconds to match CSS animation)
     setTimeout(() => {
       setIsRolling(false);
-    }, 1000);
+    }, 3000);
   }, [isMyTurn, isRolling, game?.diceValue, remainingMoves, game.roomCode]);
 
   // Click edge
@@ -324,19 +340,23 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
             <div
               key={`h-edge-${row}-${col}`}
               onClick={() => hEdge && handleEdgeClick(hEdge)}
-              className="absolute h-2.5 rounded-full z-10 transition-all duration-200 cursor-pointer"
+              className={`absolute h-2.5 rounded-full z-10 transition-all duration-200 cursor-pointer`}
               style={{
-                background: isOwned
-                  ? isMine
-                    ? '#38BDF8'
-                    : '#FB923C'
-                  : '#445266',
+                background: isMyTurn && remainingMoves > 0 && !isOwned
+                  ? 'linear-gradient(90deg, #445266 0%, #445266 33%, rgba(203,213,225,0.9) 50%, #445266 67%, #445266 100%)'
+                  : isOwned
+                    ? isMine
+                      ? '#38BDF8'
+                      : '#FB923C'
+                    : '#445266',
+                backgroundSize: isMyTurn && remainingMoves > 0 && !isOwned ? '200% 100%' : 'auto',
                 boxShadow: isOwned
                   ? isMine
                     ? '0 0 10px rgba(56,189,248,0.7)'
                     : '0 0 10px rgba(251,146,60,0.7)'
                   : 'none',
-                opacity: isMyTurn && remainingMoves > 0 && !isOwned ? 0.8 : 1,
+                opacity: 1,
+                animation: isMyTurn && remainingMoves > 0 && !isOwned ? 'shimmer 2s ease-in-out infinite' : 'none',
                 left: `calc(${col} * ${cellSize} + 6px)`,
                 top: `calc(${row} * ${cellSize})`,
                 width: `calc(${cellSize} - 12px)`,
@@ -356,19 +376,23 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
             <div
               key={`v-edge-${row}-${col}`}
               onClick={() => vEdge && handleEdgeClick(vEdge)}
-              className="absolute w-2.5 rounded-full z-10 transition-all duration-200 cursor-pointer"
+              className={`absolute w-2.5 rounded-full z-10 transition-all duration-200 cursor-pointer`}
               style={{
-                background: isOwned
-                  ? isMine
-                    ? '#38BDF8'
-                    : '#FB923C'
-                  : '#445266',
+                background: isMyTurn && remainingMoves > 0 && !isOwned
+                  ? 'linear-gradient(180deg, #445266 0%, #445266 33%, rgba(203,213,225,0.9) 50%, #445266 67%, #445266 100%)'
+                  : isOwned
+                    ? isMine
+                      ? '#38BDF8'
+                      : '#FB923C'
+                    : '#445266',
+                backgroundSize: isMyTurn && remainingMoves > 0 && !isOwned ? '100% 200%' : 'auto',
                 boxShadow: isOwned
                   ? isMine
                     ? '0 0 10px rgba(56,189,248,0.7)'
                     : '0 0 10px rgba(251,146,60,0.7)'
                   : 'none',
-                opacity: isMyTurn && remainingMoves > 0 && !isOwned ? 0.8 : 1,
+                opacity: 1,
+                animation: isMyTurn && remainingMoves > 0 && !isOwned ? 'shimmerVertical 2s ease-in-out infinite' : 'none',
                 left: `calc(${col} * ${cellSize})`,
                 top: `calc(${row} * ${cellSize} + 6px)`,
                 height: `calc(${cellSize} - 12px)`,
@@ -393,6 +417,10 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
           let textColor = 'text-white';
           let borderStyle = '';
           let shape = 'rounded-full'; // Monedas son circulares, billetes rectangulares
+          
+          // Get player info for emoji
+          const ownerPlayer = isOwned ? game?.players?.find(p => p.nickname === box.owner) : null;
+          const ownerAvatar = ownerPlayer?.avatarId ? getAvatarById(ownerPlayer.avatarId) : null;
           
           if (isOwned) {
             // When owned, show player color
@@ -449,28 +477,64 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
           elements.push(
             <div
               key={`box-${row}-${col}`}
-              className={`absolute flex items-center justify-center z-5 transition-all duration-300 ${
-                isOwned ? 'scale-100 opacity-100' : 'scale-90 opacity-100'
-              }`}
+              className={`absolute flex items-center justify-center z-5 transition-all duration-300 p-2`}
               style={{
                 left: `calc((${col} + 0.5) * ${cellSize})`,
                 top: `calc((${row} + 0.5) * ${cellSize})`,
-                width: `calc(${cellSize} * 0.49)`,
-                height: `calc(${cellSize} * 0.49)`,
+                width: `calc(${cellSize} * 0.85)`,
+                height: `calc(${cellSize} * 0.85)`,
                 transform: 'translate(-50%, -50%)'
               }}
             >
-              <div
-                className={`w-full h-full ${shape} flex flex-col items-center justify-center font-bold ${
-                  coinColor
-                } ${textColor} ${borderStyle}`}
-                style={{
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.3)'
-                }}
-              >
-                <span className="text-xs">$</span>
-                <span className="text-sm leading-none font-extrabold">{coinDisplay}</span>
-              </div>
+              {isOwned ? (
+                // Enclosed box with background and border
+                <div 
+                  className="w-full h-full rounded-lg flex items-center justify-center relative"
+                  style={{
+                    background: isMine ? 'rgba(56, 189, 248, 0.1)' : 'rgba(251, 146, 60, 0.1)',
+                    border: isMine ? '1px solid rgba(56, 189, 248, 0.2)' : '1px solid rgba(251, 146, 60, 0.2)'
+                  }}
+                >
+                  <div
+                    className={`${shape} flex items-center justify-center ${
+                      coinColor
+                    } ${textColor} ${borderStyle}`}
+                    style={{
+                      width: 'clamp(3.2rem, 10vw, 4.5rem)',
+                      height: 'clamp(3.2rem, 10vw, 4.5rem)',
+                      boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.3)'
+                    }}
+                  >
+                    <span className="text-base font-bold leading-none whitespace-nowrap">${coinDisplay}</span>
+                  </div>
+                  {/* Emoji badge in top-right corner */}
+                  {ownerAvatar && (
+                    <div 
+                      className="absolute -top-1 -right-1 text-lg rounded-md shadow-sm px-1.5 py-0.5"
+                      style={{
+                        background: isMine ? '#38BDF8' : '#FB923C',
+                        border: '2px solid #1E293B'
+                      }}
+                    >
+                      {ownerAvatar.emoji}
+                    </div>
+                  )}
+                </div>
+              ) : (
+                // Unowned coin
+                <div
+                  className={`${shape} flex items-center justify-center ${
+                    coinColor
+                  } ${textColor} ${borderStyle}`}
+                  style={{
+                    width: 'clamp(3.2rem, 10vw, 4.5rem)',
+                    height: 'clamp(3.2rem, 10vw, 4.5rem)',
+                    boxShadow: '0 4px 12px rgba(0, 0, 0, 0.5), 0 2px 4px rgba(0, 0, 0, 0.3)'
+                  }}
+                >
+                  <span className="text-base font-bold leading-none whitespace-nowrap">${coinDisplay}</span>
+                </div>
+              )}
             </div>
           );
         }
@@ -500,9 +564,10 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
   };
 
   // Player panel component
-  const PlayerPanel = ({ player, score, isCurrentUser, isActive }: { 
+  const PlayerPanel = ({ player, score, moneyEarned, isCurrentUser, isActive }: { 
     player: Player | null; 
-    score: number; 
+    score: number;
+    moneyEarned: number; 
     isCurrentUser: boolean;
     isActive: boolean;
   }) => {
@@ -513,7 +578,7 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
         !isCurrentUser ? 'opacity-70 hover:opacity-100' : ''
       }`}>
         <div 
-          className={`relative overflow-hidden rounded-xl p-5`}
+          className={`relative overflow-hidden rounded-xl p-3 lg:p-5`}
           style={{
             background: isCurrentUser ? '#1E293B' : '#151E30',
             border: isActive && isCurrentUser ? '2px solid #38BDF8' : '1px solid #475569',
@@ -522,46 +587,46 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
         >
           {/* "Tu Turno" badge - solo cuando está activo y es el usuario actual */}
           {isActive && isCurrentUser && (
-            <div className="absolute top-0 right-0 px-3 py-1 rounded-bl-xl text-xs font-bold uppercase tracking-wider text-slate-900" style={{ background: '#38BDF8' }}>
+            <div className="absolute top-0 right-0 px-2 py-1 lg:px-3 lg:py-1 rounded-bl-xl text-xs font-bold uppercase tracking-wider text-slate-900" style={{ background: '#38BDF8' }}>
               Tu Turno
             </div>
           )}
 
           {/* Avatar y nombre */}
-          <div className="flex items-center gap-4 mb-6">
+          <div className="flex items-center gap-3 lg:gap-4 mb-3 lg:mb-6">
             <div className="relative">
               {avatar ? (
                 <>
                   <div 
-                    className="w-16 h-16 rounded-full bg-cover bg-center border-2"
+                    className="w-12 h-12 lg:w-16 lg:h-16 rounded-full bg-cover bg-center border-2"
                     style={{
                       borderColor: isCurrentUser ? '#38BDF8' : '#444',
                       background: avatar.background,
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '2rem'
+                      fontSize: 'clamp(1.5rem, 4vw, 2rem)'
                     }}
                   >
                     {avatar.emoji}
                   </div>
                   {isCurrentUser && (
-                    <div className="absolute -bottom-1 -right-1 text-slate-900 p-1 rounded-full border-2" style={{ background: '#38BDF8', borderColor: '#1E293B' }}>
+                    <div className="hidden lg:block absolute -bottom-1 -right-1 text-slate-900 p-1 rounded-full border-2" style={{ background: '#38BDF8', borderColor: '#1E293B' }}>
                       <span className="material-symbols-outlined text-sm block">edit</span>
                     </div>
                   )}
                 </>
               ) : (
-                <div className={`w-16 h-16 rounded-full flex items-center justify-center text-2xl ${
+                <div className={`w-12 h-12 lg:w-16 lg:h-16 rounded-full flex items-center justify-center text-xl lg:text-2xl ${
                   isCurrentUser ? 'bg-cyan-500/30 border-2 border-cyan-400' : 'bg-slate-700 border-2 border-slate-600'
                 }`}>
                   👤
                 </div>
               )}
             </div>
-            <div>
-              <h3 className="text-xl font-bold text-white">{player?.nickname || 'Esperando...'}</h3>
-              <p className={`text-sm font-medium ${
+            <div className="flex-1 min-w-0">
+              <h3 className="text-base lg:text-xl font-bold text-white truncate">{player?.nickname || 'Esperando...'}</h3>
+              <p className={`text-xs lg:text-sm font-medium ${
                 isActive && isCurrentUser ? 'text-cyan-400' : 'text-slate-400'
               }`}>
                 {isActive && isCurrentUser ? 'Jugando...' : 'Esperando...'}
@@ -569,24 +634,24 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
             </div>
           </div>
 
-          {/* Stats */}
-          <div className="space-y-3">
-            <div className="flex justify-between items-center p-3 rounded-lg border border-slate-700" style={{ background: '#020617' }}>
-              <span className="text-slate-400 text-sm">Puntaje Total</span>
-              <span className="text-2xl font-bold" style={{ color: isCurrentUser ? '#FFFFFF' : '#898A92' }}>
-                {score.toLocaleString()}
-              </span>
-            </div>
-            <div className="flex justify-between items-center p-3 rounded-lg border border-slate-700" style={{ background: '#020617' }}>
-              <span className="text-slate-400 text-sm">Monedas</span>
+          {/* Stats - More compact on mobile */}
+          <div className="flex lg:flex-col gap-2 lg:gap-3">
+            <div className="flex-1 flex flex-col lg:flex-row justify-between items-center p-2 lg:p-3 rounded-lg border border-slate-700" style={{ background: '#020617' }}>
+              <span className="text-slate-400 text-xs lg:text-sm">Monedas Ganadas</span>
               <div className="flex items-center gap-1">
                 <span className="material-symbols-outlined text-sm" style={{ color: isCurrentUser ? '#EAB308' : '#898A92' }}>
                   monetization_on
                 </span>
-                <span className="text-lg font-bold" style={{ color: isCurrentUser ? '#FFFFFF' : '#898A92' }}>
+                <span className="text-base lg:text-lg font-bold" style={{ color: isCurrentUser ? '#FFFFFF' : '#898A92' }}>
                   {score}
                 </span>
               </div>
+            </div>
+            <div className="flex-1 flex flex-col lg:flex-row justify-between items-center p-2 lg:p-3 rounded-lg border border-slate-700" style={{ background: '#020617' }}>
+              <span className="text-slate-400 text-xs lg:text-sm">Dinero Ganado</span>
+              <span className="text-lg lg:text-2xl font-bold" style={{ color: isCurrentUser ? '#FFFFFF' : '#898A92' }}>
+                ${moneyEarned.toLocaleString()}
+              </span>
             </div>
           </div>
         </div>
@@ -640,27 +705,27 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
 
   return (
     <div
-      className="fixed inset-0 flex flex-col overflow-hidden"
+      className="min-h-screen lg:fixed lg:inset-0 flex flex-col"
       style={{ background: '#020617' }}
     >
       {/* Header */}
-      <header className="flex items-center justify-between px-6 py-3 border-b border-white/10" style={{ background: '#0C1326' }}>
-        <div className="flex items-center gap-3">
-          <span className="text-2xl">🎲</span>
-          <h1 className="text-xl font-bold text-white">BoxBet</h1>
+      <header className="sticky top-0 z-50 flex items-center justify-between px-3 py-2 lg:px-6 lg:py-3 border-b border-white/10 flex-shrink-0" style={{ background: '#0C1326' }}>
+        <div className="flex items-center gap-2 lg:gap-3">
+          <span className="text-xl lg:text-2xl">🎲</span>
+          <h1 className="text-base lg:text-xl font-bold text-white">BoxBet</h1>
         </div>
         <div className="text-center">
-          <h2 className="text-lg font-semibold text-white">Arena Multijugador</h2>
-          <p className="text-sm text-gray-400">Sala: {game.roomCode}</p>
+          <h2 className="text-sm lg:text-lg font-semibold text-white">Arena Multijugador</h2>
+          <p className="text-xs lg:text-sm text-gray-400">Sala: {game.roomCode}</p>
         </div>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-400">Apuesta:</span>
-          <span className="text-yellow-400 font-bold">${game?.betAmount || 0}</span>
+        <div className="flex items-center gap-1 lg:gap-2">
+          <span className="text-xs lg:text-sm text-gray-400 hidden sm:inline">Pozo Total:</span>
+          <span className="text-yellow-400 font-bold text-sm lg:text-base">${(game?.betAmount || 0) * 2}</span>
         </div>
       </header>
 
       {/* Main game area */}
-      <div className="flex-1 flex flex-col lg:flex-row items-stretch justify-center p-4 gap-4 lg:gap-6 min-h-0 overflow-auto lg:overflow-hidden">
+      <div className="flex-1 flex flex-col lg:flex-row items-stretch justify-center p-3 lg:p-4 gap-3 lg:gap-6 lg:min-h-0 lg:overflow-hidden">
         
         {/* Desktop: Left side - Current player + Dice (25%) */}
         {/* Mobile: Hidden, shown at bottom */}
@@ -670,7 +735,8 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
             <div className="flex-shrink-0">
               <PlayerPanel 
                 player={currentPlayer} 
-                score={myScore} 
+                score={myScore}
+                moneyEarned={myMoneyEarned} 
                 isCurrentUser={true}
                 isActive={isMyTurn}
               />
@@ -714,9 +780,9 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
                 <div className="flex justify-between items-center">
                   <span className="text-xs text-slate-500">Tiempo restante</span>
                   <div className={`font-mono font-bold ${
-                    placementTimer <= 10 ? 'text-red-400 animate-pulse' : 'text-yellow-400'
+                    unifiedTimer <= 10 ? 'text-red-400 animate-pulse' : 'text-yellow-400'
                   }`}>
-                    {Math.floor(placementTimer / 60)}:{(placementTimer % 60).toString().padStart(2, '0')}
+                    {Math.floor(unifiedTimer / 60)}:{(unifiedTimer % 60).toString().padStart(2, '0')}
                   </div>
                 </div>
               </div>
@@ -726,15 +792,15 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
         </div>
 
         {/* Game board container - 50% on desktop, full width on mobile */}
-        <div className="flex-1 lg:w-[50%] flex flex-col items-center justify-center">
+        <div className="flex-1 lg:w-[50%] flex flex-col items-center justify-start lg:justify-center">
           {/* Game board */}
           <div 
-            className="relative rounded-2xl border border-white/10 w-full"
+            className="relative rounded-2xl border border-white/10 w-full flex-shrink-0 mx-auto"
             style={{
               background: '#1E293B',
-              maxWidth: 'min(95vw, 80vh)',
+              maxWidth: 'min(calc(100vw - 1.5rem), 500px)',
               aspectRatio: '1 / 1',
-              padding: 'clamp(0.9rem, 2.4vw, 2.4rem)'
+              padding: 'clamp(0.6rem, 1.8vw, 2.4rem)'
             }}
           >
             {/* Dot pattern background */}
@@ -750,8 +816,8 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
             </div>
           </div>
 
-          {/* Turn indicator & Timer */}
-          <div className="mt-4 flex flex-wrap items-center justify-center gap-3">
+          {/* Turn indicator & Timer - Desktop only */}
+          <div className="hidden lg:flex mt-4 flex-wrap items-center justify-center gap-3">
             <div className={`px-4 py-2 rounded-full font-bold text-sm ${
               isMyTurn 
                 ? 'bg-cyan-500/20 text-cyan-400 border border-cyan-500'
@@ -760,11 +826,57 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
               {isMyTurn ? '¡Tu turno!' : `Turno de ${opponent?.nickname || 'oponente'}`}
             </div>
             
-            <div className={`flex items-center gap-2 px-4 py-2 rounded-full ${
-              turnTimer <= 10 ? 'bg-red-500/20 text-red-400' : 'bg-gray-700/50 text-gray-300'
+            <div className={`flex items-center gap-2 px-4 py-2 rounded-full text-sm ${
+              unifiedTimer <= 10 ? 'bg-red-500/20 text-red-400' : 'bg-gray-700/50 text-gray-300'
             }`}>
               <span>⏱️</span>
-              <span className="font-mono font-bold">{turnTimer}s</span>
+              <span className="font-mono font-bold">{unifiedTimer}s</span>
+            </div>
+          </div>
+
+          {/* Mobile only: Horizontal control bar */}
+          <div className="lg:hidden mt-3 w-full max-w-md mx-auto">
+            <div className="flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-slate-700" style={{ background: '#020617' }}>
+              {/* Left: Turn indicator */}
+              <div className={`flex flex-col items-start text-xs font-bold ${
+                isMyTurn ? 'text-cyan-400' : 'text-orange-400'
+              }`}>
+                <span className="text-[10px] text-slate-400 uppercase">Turno</span>
+                <span className="leading-tight">{isMyTurn ? 'Tuyo' : opponent?.nickname || 'Oponente'}</span>
+              </div>
+              
+              {/* Center: Timer */}
+              <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs ${
+                unifiedTimer <= 10 ? 'bg-red-500/20 text-red-400' : 'bg-slate-700/50 text-slate-300'
+              }`}>
+                <span>⏱️</span>
+                <span className="font-mono font-bold">
+                  {timerPhase === 'placing-moves' 
+                    ? `${Math.floor(unifiedTimer / 60)}:${(unifiedTimer % 60).toString().padStart(2, '0')}`
+                    : `${unifiedTimer}s`
+                  }
+                </span>
+              </div>
+              
+              {/* Right: Moves count + Dice */}
+              <div className="flex items-center gap-2">
+                {remainingMoves > 0 && (
+                  <span className="text-lg font-bold text-cyan-400">{remainingMoves}</span>
+                )}
+                <button
+                  onClick={handleRollDice}
+                  disabled={!isMyTurn || isRolling || remainingMoves > 0}
+                  className={`w-14 h-14 bg-slate-950 rounded-xl border border-slate-700 flex items-center justify-center active:scale-95 transition-transform disabled:opacity-50`}
+                  style={{
+                    boxShadow: isMyTurn && !isRolling && remainingMoves === 0 ? '0 0 20px rgba(56, 189, 248, 0.5)' : 'none',
+                    animation: isMyTurn && !isRolling && remainingMoves === 0 
+                      ? 'shake 2s ease-in-out infinite' 
+                      : 'none'
+                  }}
+                >
+                  <Dice value={diceValue} isRolling={isRolling} />
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -776,7 +888,8 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
             <div className="flex-shrink-0">
               <PlayerPanel 
                 player={opponent} 
-                score={opponentScore} 
+                score={opponentScore}
+                moneyEarned={opponentMoneyEarned} 
                 isCurrentUser={false}
                 isActive={!isMyTurn && !!opponent}
               />
@@ -804,11 +917,12 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
         </div>
 
         {/* Mobile only: Player panels at bottom */}
-        <div className="lg:hidden flex flex-col gap-4 w-full max-w-md mx-auto pb-4">
+        <div className="lg:hidden flex flex-col gap-3 w-full max-w-md mx-auto pb-4">
           {/* Current player */}
           <PlayerPanel 
             player={currentPlayer} 
-            score={myScore} 
+            score={myScore}
+            moneyEarned={myMoneyEarned} 
             isCurrentUser={true}
             isActive={isMyTurn}
           />
@@ -816,7 +930,8 @@ const GameBoard: React.FC<GameBoardProps> = ({ game, currentPlayerId, onGameEnd 
           {/* Opponent player */}
           <PlayerPanel 
             player={opponent} 
-            score={opponentScore} 
+            score={opponentScore}
+            moneyEarned={opponentMoneyEarned} 
             isCurrentUser={false}
             isActive={!isMyTurn && !!opponent}
           />

@@ -4,12 +4,52 @@
   .dice-container {
     @apply flex justify-center items-center;
     perspective: 1000px;
+    outline: none !important;
+    -webkit-tap-highlight-color: transparent;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .dice-container:focus,
+  .dice-container:focus-visible,
+  .dice-container:active,
+  .dice-container:hover {
+    outline: none !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+
+  .dice-container *,
+  .dice-container *:focus,
+  .dice-container *:focus-visible,
+  .dice-container *:active {
+    outline: none !important;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .dice {
-    @apply w-[100px] h-[100px] relative transition-transform duration-[1500ms];
+    outline: none !important;
+    border: none !important;
+  }
+
+  .dice:focus,
+  .dice:focus-visible,
+  .dice:active {
+    outline: none !important;
+    border: none !important;
+  }
+
+  .dice {
+    @apply relative transition-transform duration-[3000ms];
+    width: clamp(60px, 15vw, 100px);
+    height: clamp(60px, 15vw, 100px);
     transform-style: preserve-3d;
-    transition-timing-function: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition-timing-function: ease-in-out;
+    outline: none !important;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    transform: translate3d(0, 0, 0);
   }
 
   .dice.rolling {
@@ -17,12 +57,17 @@
   }
 
   .dice-face {
-    @apply absolute w-[100px] h-[100px] border-[3px] border-[#d0d0d0] rounded-2xl flex flex-wrap justify-between content-between p-[15px];
+    @apply absolute border-[3px] border-[#d0d0d0] rounded-2xl flex flex-wrap justify-between content-between;
+    width: clamp(60px, 15vw, 100px);
+    height: clamp(60px, 15vw, 100px);
+    padding: clamp(9px, 2.25vw, 15px);
     background: linear-gradient(145deg, #ffffff 0%, #f0f0f0 50%, #e8e8e8 100%);
     box-shadow: 
       inset 0 5px 10px rgba(255, 255, 255, 0.8),
       inset 0 -5px 10px rgba(0, 0, 0, 0.2),
       0 10px 30px rgba(0, 0, 0, 0.3);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
 
   .dice-face::before {
@@ -33,32 +78,34 @@
 
   /* Posicionamiento de las caras del dado */
   .dice-face-1 {
-    transform: rotateY(0deg) translateZ(50px);
+    transform: rotateY(0deg) translateZ(clamp(30px, 7.5vw, 50px));
   }
 
   .dice-face-2 {
-    transform: rotateY(90deg) translateZ(50px);
+    transform: rotateY(90deg) translateZ(clamp(30px, 7.5vw, 50px));
   }
 
   .dice-face-3 {
-    transform: rotateY(180deg) translateZ(50px);
+    transform: rotateY(180deg) translateZ(clamp(30px, 7.5vw, 50px));
   }
 
   .dice-face-4 {
-    transform: rotateY(-90deg) translateZ(50px);
+    transform: rotateY(-90deg) translateZ(clamp(30px, 7.5vw, 50px));
   }
 
   .dice-face-5 {
-    transform: rotateX(90deg) translateZ(50px);
+    transform: rotateX(90deg) translateZ(clamp(30px, 7.5vw, 50px));
   }
 
   .dice-face-6 {
-    transform: rotateX(-90deg) translateZ(50px);
+    transform: rotateX(-90deg) translateZ(clamp(30px, 7.5vw, 50px));
   }
 
   /* Puntos del dado */
   .dot {
-    @apply w-[18px] h-[18px] rounded-full absolute;
+    @apply rounded-full absolute;
+    width: clamp(11px, 2.75vw, 18px);
+    height: clamp(11px, 2.75vw, 18px);
     background: radial-gradient(circle, #333 0%, #1a1a1a 70%);
     box-shadow: 
       inset 0 2px 3px rgba(0, 0, 0, 0.4),
@@ -67,19 +114,23 @@
 
   /* Posiciones de los puntos */
   .dot-top-left {
-    @apply top-[15px] left-[15px];
+    top: clamp(9px, 2.25vw, 15px);
+    left: clamp(9px, 2.25vw, 15px);
   }
 
   .dot-top-right {
-    @apply top-[15px] right-[15px];
+    top: clamp(9px, 2.25vw, 15px);
+    right: clamp(9px, 2.25vw, 15px);
   }
 
   .dot-middle-left {
-    @apply top-1/2 left-[15px] -translate-y-1/2;
+    @apply top-1/2 -translate-y-1/2;
+    left: clamp(9px, 2.25vw, 15px);
   }
 
   .dot-middle-right {
-    @apply top-1/2 right-[15px] -translate-y-1/2;
+    @apply top-1/2 -translate-y-1/2;
+    right: clamp(9px, 2.25vw, 15px);
   }
 
   .dot-center {
@@ -87,11 +138,12 @@
   }
 
   .dot-bottom-left {
-    @apply bottom-[15px] left-[15px];
+    bottom: clamp(9px, 2.25vw, 15px);
+    left: clamp(9px, 2.25vw, 15px);
   }
 
   .dot-bottom-right {
-    @apply bottom-[15px] right-[15px];
+    bottom: clamp(9px, 2.25vw, 15px);
+    right: clamp(9px, 2.25vw, 15px);
   }
 }
-
